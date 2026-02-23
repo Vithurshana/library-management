@@ -1,5 +1,7 @@
 package com.example.library.management.controllers;
 
+import com.example.library.management.Helpers.dto.BorrowRequest;
+import com.example.library.management.Helpers.dto.ReturnRequest;
 import com.example.library.management.entities.BorrowEntity;
 import com.example.library.management.services.BorrowService;
 import org.springframework.web.bind.annotation.*;
@@ -16,13 +18,13 @@ public class BorrowController {
 
     // Borrow book
     @PostMapping("/borrow")
-    public BorrowEntity borrowBook(@RequestParam Long userId, @RequestParam Long bookId) {
-        return borrowService.borrowBook(userId, bookId);
+    public BorrowEntity borrowBook(@RequestBody BorrowRequest request) {
+        return borrowService.borrowBook(request.getUserId(), request.getBookId());
     }
 
     // Return book
-    @PostMapping("/return/{borrowId}")
-    public BorrowEntity returnBook(@PathVariable Long borrowId) {
-        return borrowService.returnBook(borrowId);
+    @PostMapping("/return")
+    public BorrowEntity returnBook(@RequestBody ReturnRequest request) {
+        return borrowService.returnBook(request.getBorrowId());
     }
 }
