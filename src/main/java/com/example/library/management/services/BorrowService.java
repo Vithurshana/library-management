@@ -12,9 +12,10 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-
 import java.time.LocalDateTime;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 public class BorrowService {
 
@@ -31,11 +32,22 @@ public class BorrowService {
     // Borrow Book
     public BorrowEntity borrowBook(Long userId, Long bookId) {
 
-        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        log.info("Attempting to borrow book. userId={}, bookId={}", userId, bookId);
 
-        BookEntity book = bookRepository.findById(bookId).orElseThrow(() -> new RuntimeException("Book not found"));
+        UserEntity user = userRepository.findById(userId)
+            .orElseThrow(() -> {
+                log.error("User not found with id={}", userId);
+                return new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+            });
+
+        BookEntity book = bookRepository.findById(bookId)
+            .orElseThrow(() -> {
+                log.error("Book not found with id={}", bookId);
+                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found");
+            });
 
         if (book.getStock() <= 0) {
+            log.warn("Book out of stock. bookId={}", bookId);
             throw new RuntimeException("Book out of stock");
         }
 
@@ -47,7 +59,12 @@ public class BorrowService {
         borrow.setBook(book);
         borrow.setBorrowDate(LocalDateTime.now());
 
-        return borrowRepository.save(borrow);
+        BorrowEntity savedBorrow = borrowRepository.save(borrow);
+
+        log.info("Book borrowed successfully. borrowId={}, userId={}, bookId={}",
+                savedBorrow.getId(), userId, bookId);
+
+        return savedBorrow;
     }
 
     // Return Book
@@ -102,15 +119,21 @@ public class BorrowService {
     @Transactional
     public BorrowEntity returnBook(Long borrowId) {
 
-        BorrowEntity borrow = borrowRepository.findById(borrowId)
-                .orElseThrow(() ->
-                        new ResponseStatusException(HttpStatus.NOT_FOUND, "Borrow record not found")
-                );
+        log.info("Attempting to return book. borrowId={}", borrowId);
+
+        BorrowEntity borrow = borrowRepository.findById(borrowId).orElseThrow(() -> {
+            log.error("Borrow record not found. borrowId={}", borrowId);
+            return new ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Borrow record not found"
+            );
+        });
 
         if (borrow.getReturnDate() != null) {
+            log.warn("Book already returned. borrowId={}", borrowId);
             throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Book already returned"
+                HttpStatus.BAD_REQUEST,
+                "Book already returned"
             );
         }
 
@@ -120,6 +143,10 @@ public class BorrowService {
         book.setStock(book.getStock() + 1);
         bookRepository.save(book);
 
-        return borrowRepository.save(borrow);
+        BorrowEntity updatedBorrow = borrowRepository.save(borrow);
+
+        log.info("Book returned successfully. borrowId={}, bookId={}", borrowId, book.getId());
+
+        return updatedBorrow;
     }
 }
