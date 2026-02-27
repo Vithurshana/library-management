@@ -1,4 +1,4 @@
-package com.example.library.management.security;
+package com.example.library.management.helpers.security;
 
 import org.springframework.context.annotation.*;
 import org.springframework.security.authentication.*;
@@ -31,16 +31,38 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
-            .sessionManagement(session ->
-                    session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                    .requestMatchers("/api/users/register", "/api/auth/login")
-                    .permitAll()
-                    .anyRequest().authenticated()
+                .requestMatchers("/api/users/register", "/api/auth/login")
+                .permitAll()
+                .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
+//@Bean
+//public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+//
+//    http
+//            .csrf(csrf -> csrf.disable())
+//            .sessionManagement(session ->
+//                    session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+//            )
+//            .authorizeHttpRequests(auth -> auth
+//                    .requestMatchers("/api/auth/**").permitAll()
+//                    .anyRequest().authenticated()
+//            )
+//            .exceptionHandling(exception -> exception
+//                    .authenticationEntryPoint((request, response, ex) -> {
+//                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+//                    })
+//                    .accessDeniedHandler((request, response, ex) -> {
+//                        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+//                    })
+//            )
+//            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+//
+//    return http.build();
+//}
 }

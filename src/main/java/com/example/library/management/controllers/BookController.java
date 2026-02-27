@@ -1,10 +1,13 @@
 package com.example.library.management.controllers;
 
+import com.example.library.management.dtos.books.Book;
+import com.example.library.management.dtos.responses.BaseResponse;
+import com.example.library.management.dtos.responses.books.BookListResponse;
 import com.example.library.management.entities.BookEntity;
 import com.example.library.management.services.BookService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/books")
@@ -18,20 +21,19 @@ public class BookController {
 
     // GET all books
     @GetMapping
-    public List<BookEntity> getAllBooks() {
+    public ResponseEntity<BaseResponse<BookListResponse>> getAllBooks() {
         return bookService.getAllBooks();
     }
 
-    // GET book by id
     @GetMapping("/{id}")
-    public BookEntity getBookById(@PathVariable Long id) {
+    public ResponseEntity<BaseResponse<Book>> getBookById(@PathVariable Long id) {
         return bookService.getBookById(id);
     }
 
     // POST add new book
     @PostMapping
-    public BookEntity addBook(@RequestBody BookEntity book) {
-        return bookService.addBook(book);
+    public ResponseEntity<BaseResponse<Book>> addBook(@RequestBody BookEntity book) {
+        return  bookService.addBook(book);
     }
 }
 

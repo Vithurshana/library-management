@@ -1,7 +1,9 @@
 package com.example.library.management.controllers;
 
-import com.example.library.management.Helpers.BaseResponse;
-import com.example.library.management.security.JwtUtil;
+import com.example.library.management.dtos.responses.BaseResponse;
+import com.example.library.management.dtos.responses.auth.LoginResponse;
+import com.example.library.management.helpers.security.JwtUtil;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.*;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,16 +20,13 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public BaseResponse login(@RequestParam String username, @RequestParam String password) {
-
+    public BaseResponse<LoginResponse> login(@RequestParam String username, @RequestParam String password) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
 
+        String token = jwtUtil.generateToken(username);
 
-        String aaa = jwtUtil.generateToken(username);
+        LoginResponse loginResponse = new LoginResponse(token);
 
-        BaseResponse a = new BaseResponse();
-        a.data = aaa;
-
-        return a;
+        return new BaseResponse<>(HttpStatus.OK.value(), "Login successful", loginResponse);
     }
 }

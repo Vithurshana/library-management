@@ -18,7 +18,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) {
-
+        log.info("---loadUserByUsername() started---");
         log.info("Authentication attempt for username={}", username);
 
         UserEntity user = userRepository.findByUsername(username)
@@ -28,7 +28,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         });
 
         log.debug("User found in database. username={}, userId={}", user.getUsername(), user.getId());
-
+        log.info("---loadUserByUsername() ended---");
         return User.builder()
             .username(user.getUsername())
             .password(user.getPassword())
