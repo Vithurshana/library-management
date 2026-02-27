@@ -26,6 +26,8 @@ public class BookEntity {
 
     private Integer stock;
 
+    private String pdfPath;
+
     @CreatedDate
     private LocalDateTime createdAt;
 
@@ -35,9 +37,10 @@ public class BookEntity {
     // Constructors
     public BookEntity() {}
 
-    public BookEntity(String title, String author, Integer stock) {
+    public BookEntity(String title, String author, Integer stock, String pdfPath) {
         this.title = title;
         this.author = author;
         this.stock = stock;
+        this.pdfPath = pdfPath;
     }
 }

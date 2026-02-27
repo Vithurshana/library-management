@@ -9,7 +9,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 
 @Slf4j
@@ -41,33 +46,79 @@ public class BookService {
     }
 
     // Add new book
-    public ResponseEntity<BaseResponse<Book>> addBook(BookEntity book) {
+//    public ResponseEntity<BaseResponse<Book>> addBook(BookEntity book) {
+//
+//        log.info("---addBook() started---");
+//        log.info("Adding new book with title: {}", book.getTitle());
+//        ResponseEntity<BaseResponse<Book>> response;
+//
+//        try {
+//            Book savedBook = new Book(bookRepository.save(book));
+//
+//            log.info("Book added successfully with id: {}", savedBook.getId());
+//            response =
+//                    new ResponseEntity<>(new BaseResponse<>(HttpStatus.CREATED.value(), "Book added successfully",
+//                            savedBook), HttpStatus.CREATED);
+//
+//
+//        }
+//        catch (Exception e) {
+//
+//            log.error("Error while adding book: {}", book.getTitle(), e);
+//            response =
+//                    new ResponseEntity<>( new BaseResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Failed to add book", null),
+//                            HttpStatus.INTERNAL_SERVER_ERROR);
+//        }
+//
+//
+//        log.info("---addBook() started---");
+//        return response;
+//    }
+    public ResponseEntity<BaseResponse<Book>> addBook(BookEntity book, MultipartFile file) {
 
         log.info("---addBook() started---");
         log.info("Adding new book with title: {}", book.getTitle());
-        ResponseEntity<BaseResponse<Book>> response;
 
         try {
-            Book savedBook = new Book(bookRepository.save(book));
+
+            // Save file to Uploads folder
+            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+
+            Path uploadPath = Paths.get("Uploads");
+            Files.createDirectories(uploadPath);
+
+            Path filePath = uploadPath.resolve(fileName);
+            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+            // Save file path in entity
+            book.setPdfPath(fileName);
+
+            // Save book in DB
+            BookEntity savedEntity = bookRepository.save(book);
+
+            Book savedBook = new Book(savedEntity);
 
             log.info("Book added successfully with id: {}", savedBook.getId());
-            response =
-                    new ResponseEntity<>(new BaseResponse<>(HttpStatus.CREATED.value(), "Book added successfully",
-                            savedBook), HttpStatus.CREATED);
 
+            return new ResponseEntity<>(
+                    new BaseResponse<>(HttpStatus.CREATED.value(),
+                            "Book added successfully",
+                            savedBook),
+                    HttpStatus.CREATED
+            );
 
         }
         catch (Exception e) {
 
             log.error("Error while adding book: {}", book.getTitle(), e);
-            response =
-                    new ResponseEntity<>( new BaseResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Failed to add book", null),
-                            HttpStatus.INTERNAL_SERVER_ERROR);
+
+            return new ResponseEntity<>(
+                    new BaseResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                            "Failed to add book",
+                            null),
+                    HttpStatus.INTERNAL_SERVER_ERROR
+            );
         }
-
-
-        log.info("---addBook() started---");
-        return response;
     }
 
     public ResponseEntity<BaseResponse<Book>> getBookById(Long id) {

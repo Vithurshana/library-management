@@ -8,6 +8,7 @@ import com.example.library.management.services.BookService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/books")
@@ -31,9 +32,13 @@ public class BookController {
     }
 
     // POST add new book
-    @PostMapping
-    public ResponseEntity<BaseResponse<Book>> addBook(@RequestBody BookEntity book) {
-        return  bookService.addBook(book);
+//    @PostMapping
+//    public ResponseEntity<BaseResponse<Book>> addBook(@RequestBody BookEntity book) {
+//        return  bookService.addBook(book);
+//    }
+    @PostMapping("/books")
+    public ResponseEntity<BaseResponse<Book>> addBook(@RequestPart("book") BookEntity book, @RequestPart("file") MultipartFile file) {
+        return bookService.addBook(book, file);
     }
 }
 
