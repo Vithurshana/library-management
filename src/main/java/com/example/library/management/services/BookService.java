@@ -74,10 +74,18 @@ public class BookService {
 //        log.info("---addBook() started---");
 //        return response;
 //    }
-    public ResponseEntity<BaseResponse<Book>> addBook(BookEntity book, MultipartFile file) {
-
+//    public ResponseEntity<BaseResponse<Book>> addBook(BookEntity book, MultipartFile file) {
+    public ResponseEntity<BaseResponse<Book>> addBook(
+            String title,
+            String author,
+            int stock,
+            MultipartFile file) {
         log.info("---addBook() started---");
-        log.info("Adding new book with title: {}", book.getTitle());
+//        log.info("Adding new book with title: {}", book.getTitle());
+        BookEntity book = new BookEntity();
+        book.setTitle(title);
+        book.setAuthor(author);
+        book.setStock(stock);
 
         try {
 
